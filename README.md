@@ -1,9 +1,9 @@
-# Jobbernaut Backend (Control Layer)
+# Jobbernaut Tabs Backend (Control Layer)
 
 This repository hosts the **Jobbernaut Tabs Backend**, the synchronous logic layer responsible for CRUD operations and triggering asynchronous workflows.
 
 ## 🧠 Logical Component
-* **Jobbernaut Tabs Backend:** A Java Lambda function that acts as the primary API handler.
+* **Jobbernaut Tabs Backend:** A Kotlin Quarkus Lambda function that acts as the primary API handler.
 
 ## ⚡️ Responsibilities
 1. **CRUD Operations:** Reading and writing job application data to a relational database.
@@ -12,8 +12,8 @@ This repository hosts the **Jobbernaut Tabs Backend**, the synchronous logic lay
 4. **Orchestration Trigger:** Initiating the **Jobbernaut Director** (Step Functions) execution when a user requests a new tailored resume.
 
 ## 🛠 Tech Stack
-* **Runtime:** Java (AWS Lambda with SnapStart)
-* **Framework:** Java-based REST framework (TBD)
+* **Runtime:** Java (Containerized AWS Lambda with GraalVM native)
+* **Framework:** JKotlin-based Quarkus
 * **Database:** Relational database via JDBC connection pooling (TBD)
 * **Storage:** Cloud object storage bucket for Tailor artifacts
 * **Auth:** LinkedIn OAuth 2.0 + JWT
