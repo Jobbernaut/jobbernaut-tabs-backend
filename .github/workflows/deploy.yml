@@ -30,10 +30,10 @@ jobs:
         run: mvn -B verify
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: function-zip
-          path: target/function.zip
+          name: aws-lambda-function-zip
+          path: target/aws-lambda-function.zip
           retention-days: 1
 
   deploy:
@@ -41,13 +41,10 @@ jobs:
     needs: test-and-build
     steps:
       - name: Check AWS configuration
-        id: aws-check
         run: |
           if [ -z "${{ vars.AWS_ACCOUNT_ID }}" ]; then
-            echo "configured=false" >> $GITHUB_OUTPUT
-            echo "::warning::AWS_ACCOUNT_ID is not configured. Skipping deployment."
-          else
-            echo "configured=true" >> $GITHUB_OUTPUT
+            echo "::error::AWS_ACCOUNT_ID is not configured. Add it to GitHub Actions variables before deploying."
+            exit 1
           fi
 
       - name: Download build artifact
@@ -68,4 +65,4 @@ jobs:
         run: |
           aws lambda update-function-code \
             --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
-            --zip-file fileb://function.zip
+            --zip-file fileb://aws-lambda-function.zip
