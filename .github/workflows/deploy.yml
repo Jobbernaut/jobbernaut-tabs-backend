@@ -1,0 +1,71 @@
+name: Deploy to AWS Lambda
+
+on:
+  push:
+    branches: [main]
+
+env:
+  AWS_REGION: us-east-1                         # fill in later
+  LAMBDA_FUNCTION_NAME: jobbernaut-tabs-backend # fill in later
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version-file: '.mise.toml'
+          cache: maven
+
+      - name: Test and Build
+        run: mvn -B verify
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: function-zip
+          path: target/function.zip
+          retention-days: 1
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test-and-build
+    steps:
+      - name: Check AWS configuration
+        id: aws-check
+        run: |
+          if [ -z "${{ vars.AWS_ACCOUNT_ID }}" ]; then
+            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "::warning::AWS_ACCOUNT_ID is not configured. Skipping deployment."
+          else
+            echo "configured=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download build artifact
+        if: steps.aws-check.outputs.configured == 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: function-zip
+
+      - name: Configure AWS credentials via OIDC
+        if: steps.aws-check.outputs.configured == 'true'
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-actions-jobbernaut
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy to Lambda
+        if: steps.aws-check.outputs.configured == 'true'
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
+            --zip-file fileb://function.zip
