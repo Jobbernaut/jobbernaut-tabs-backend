@@ -34,20 +34,15 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: quarkus-app
-          path: target/quarkus-app/
+          path: |
+            target/*-runner.jar
+            target/lib/
           retention-days: 1
 
   deploy:
     runs-on: ubuntu-latest
     needs: test-and-build
     steps:
-      - name: Check AWS configuration
-        run: |
-          if [ -z "${{ vars.AWS_ACCOUNT_ID }}" ]; then
-            echo "::error::AWS_ACCOUNT_ID is not configured. Add it to GitHub Actions variables before deploying."
-            exit 1
-          fi
-
       - name: Checkout
         uses: actions/checkout@v6
 
@@ -55,7 +50,14 @@ jobs:
         uses: actions/download-artifact@v7
         with:
           name: quarkus-app
-          path: target/quarkus-app/
+          path: target/
+
+      - name: Check AWS configuration
+        run: |
+          if [ -z "${{ vars.AWS_ACCOUNT_ID }}" ]; then
+            echo "::error::AWS_ACCOUNT_ID is not configured. Add it to GitHub Actions variables before deploying."
+            exit 1
+          fi
 
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v6
