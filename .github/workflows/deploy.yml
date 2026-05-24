@@ -5,8 +5,9 @@ on:
     branches: [main]
 
 env:
-  AWS_REGION: us-east-1                         # fill in later
+  AWS_REGION: us-east-1 # fill in later
   LAMBDA_FUNCTION_NAME: jobbernaut-tabs-backend # fill in later
+  ECR_REPOSITORY: jobbernaut-tabs-backend # fill in later
 
 permissions:
   id-token: write
@@ -22,8 +23,8 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v5
         with:
-          distribution: 'temurin'
-          java-version: '25'
+          distribution: "temurin"
+          java-version: "25"
           cache: maven
 
       - name: Test and Build
@@ -32,8 +33,8 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v7
         with:
-          name: aws-lambda-function-zip
-          path: target/aws-lambda-function.zip
+          name: quarkus-app
+          path: target/quarkus-app/
           retention-days: 1
 
   deploy:
@@ -47,22 +48,37 @@ jobs:
             exit 1
           fi
 
+      - name: Checkout
+        uses: actions/checkout@v6
+
       - name: Download build artifact
-        if: steps.aws-check.outputs.configured == 'true'
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v7
         with:
-          name: function-zip
+          name: quarkus-app
+          path: target/quarkus-app/
 
       - name: Configure AWS credentials via OIDC
-        if: steps.aws-check.outputs.configured == 'true'
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-actions-jobbernaut
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Log in to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
       - name: Deploy to Lambda
-        if: steps.aws-check.outputs.configured == 'true'
         run: |
           aws lambda update-function-code \
             --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
-            --zip-file fileb://aws-lambda-function.zip
+            --image-uri ${{ steps.build-image.outputs.image }}
