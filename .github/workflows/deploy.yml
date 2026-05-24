@@ -5,9 +5,10 @@ on:
     branches: [main]
 
 env:
-  AWS_REGION: us-east-1 # fill in later
-  LAMBDA_FUNCTION_NAME: jobbernaut-tabs-backend # fill in later
-  ECR_REPOSITORY: jobbernaut-tabs-backend # fill in later
+  AWS_REGION: us-east-1
+  LAMBDA_FUNCTION_NAME: jobbernaut-tabs-backend
+  ECR_REPOSITORY: jobbernaut-tabs-backend
+  ROLE_NAME: jobbernaut-tabs-backend-github-actions-role
 
 permissions:
   id-token: write
@@ -62,12 +63,14 @@ jobs:
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-actions-jobbernaut
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ env.ROLE_NAME }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Log in to Amazon ECR
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
 
       - name: Build and push Docker image
         id: build-image
