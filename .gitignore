@@ -22,6 +22,7 @@ pom.xml.bak
 release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
+.flattened-pom.xml
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 
@@ -49,14 +50,12 @@ out/
 ## Eclipse
 ##############################
 .settings/
-bin/
 tmp/
 .metadata
 .classpath
 .project
 *.tmp
 *.bak
-*.swp
 *~.nib
 local.properties
 .loadpath
@@ -66,7 +65,6 @@ local.properties
 ## NetBeans
 ##############################
 nbproject/private/
-build/
 nbbuild/
 dist/
 nbdist/
@@ -80,11 +78,26 @@ nb-configuration.xml
 .code-workspace
 
 ##############################
+## Vim
+##############################
+*.swp
+*.swo
+*.orig
+*.rej
+
+##############################
 ## OS X
 ##############################
 .DS_Store
 
 ##############################
+## Quarkus
+##############################
+/.quarkus/cli/plugins/
+.certs/
+
+##############################
 ## Miscellaneous
 ##############################
 *.log
+.env
