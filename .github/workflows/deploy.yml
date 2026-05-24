@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version-file: '.mise.toml'
+          java-version-file: 'mise.toml'
           cache: maven
 
       - name: Test and Build
