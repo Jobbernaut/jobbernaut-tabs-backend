@@ -2,7 +2,7 @@
 
 Copyright (c) 2025 Snehashish Reddy Manda. All Rights Reserved.
 
-Required Notice: Copyright Snehashish Reddy Manda (https://github.com/Jobbernaut/jobbernaut-backend). Commercial usage requires a separate license. Contact: srmanda.cs@gmail.com
+Required Notice: Copyright Snehashish Reddy Manda (https://github.com/Jobbernaut/jobbernaut-tabs-backend). Commercial usage requires a separate license. Contact: srmanda.cs@gmail.com
 
 <https://polyformproject.org/licenses/noncommercial/1.0.0>
 
